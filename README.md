@@ -49,80 +49,6 @@ Scans the Windows registry for known USB device VID/PID combinations:
 
 If no VID/PID match is found, falls back to sending an `NHAWK?` handshake on every open COM port.
 
-### Confirmed Detection Output
-
-``
-=== Nanohawk Device Detection ===
-
-[1/2] WiFi UDP broadcast (1 s timeout)...
-  No WiFi response (expected if no WiFi companion MCU).
-
-[2/2] USB serial scan (VID/PID registry + handshake)...
-  FOUND  STM32 Betaflight FC (USB CDC) on COM3
-  Endpoint: serial://COM3:115200
-
-[auto] detectAny() -- WiFi first, USB fallback...
-  CONNECTED  STM32 Betaflight FC (USB CDC) on COM3
-  Endpoint:  serial://COM3:115200
-
-=== MSP Session on COM3 ===
-
-  Port open OK.
-  FC variant : BTFL
-  FW version : 4.2.0
-  Attitude   : roll -5.3 deg, pitch -6.5 deg, yaw 195 deg
-  RC channels: 1500  1500  1500  885  1175  1500  1500  1500  us
-               (roll  pitch  thr   yaw   arm   aux2  aux3  aux4)
-
-Drone detected and MSP telemetry verified. Agent ready.
-``
-
-## Data Flow: Prompt to Flight
-
-``
-1. Operator types natural-language prompt in GUI
-   |
-2. LlmClient sends prompt to local llama.cpp (http://127.0.0.1:8080/v1)
-   |
-3. LLM outputs strict mission JSON:
-   {
-     "mission_name": "forward_test",
-     "max_altitude_m": 1.0,
-     "actions": [
-       { "type": "takeoff",   "altitude_m": 1.0 },
-       { "type": "move_body", "forward_m": 2.0  },
-       { "type": "hover",     "duration_s": 5   },
-       { "type": "land"                          }
-     ]
-   }
-   |
-4. JsonPlanParser validates schema; MissionPlanner builds TaskGraph
-   |
-5. SafetyEngine validates all constraints:
-   ok  Altitude 1.0 m < ceiling
-   ok  Battery > 20% minimum
-   ok  Position inside geofence
-   ok  Operator authorization received
-   |
-6. Operator clicks "Execute"
-   |
-7. MissionExecutor translates tasks to MSP commands via MspClient:
-   - arm()       -> SET_RAW_RC: ch[4]=1900, ch[2]=1000
-   - takeoff()   -> SET_RAW_RC: throttle ramp to hover point
-   - move_body() -> SET_RAW_RC: pitch/roll setpoints + hold throttle
-   - hover()     -> SET_RAW_RC: level sticks, maintain throttle
-   - land()      -> SET_RAW_RC: throttle down, then disarm
-   |
-8. MspClient frames each command (MSP V1) and sends over USB serial (COM3)
-   |
-9. Betaflight FC executes RC inputs -- motors respond
-   |
-10. Telemetry streams back continuously:
-    readAttitude() -> roll / pitch / yaw from IMU
-    readAnalog()   -> battery V, mAh consumed, current
-    readRc()       -> live RC channel echo
-    GUI updates FPV video and telemetry panes in real-time
-``
 
 ## Safety Architecture
 
@@ -355,6 +281,7 @@ This GitHub Repository is not currently sponsored by Emax USA - https://emax-usa
 - [Qt 6 CMake](https://doc.qt.io/qt-6/cmake-get-started.html)
 
 - [OpenCV](https://docs.opencv.org/)
+
 
 
 
