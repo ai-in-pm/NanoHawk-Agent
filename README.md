@@ -439,6 +439,8 @@ Zero overhead on the serial framing path. Direct Win32 API access. No JVM or GIL
 
 Currently "Closed License".
 
+This GitHub Repository is not currently sponsored by Emax USA - https://emax-usa.com/
+
 ## References
 
 - [Betaflight MSP Protocol](https://github.com/betaflight/betaflight/blob/master/src/main/msp/msp_protocol.h)
@@ -448,3 +450,4 @@ Currently "Closed License".
 - [Qt 6 CMake](https://doc.qt.io/qt-6/cmake-get-started.html)
 
 - [OpenCV](https://docs.opencv.org/)
+
